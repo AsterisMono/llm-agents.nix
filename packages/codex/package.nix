@@ -102,12 +102,19 @@ rustPlatform.buildRustPackage (
       NIX_CFLAGS_LINK = "-fuse-ld=${lib.getExe' lld "ld64.lld"}";
     };
 
+    # The daemon would copy the whole package (~550 MB) into ~/.codex and let
+    # upstream's updater replace it. Run it from the store instead.
+    patches = [ ./daemon-nix-store.patch ];
+
     # The future returned by `connectors::list_connectors` nests deeply
     # enough that computing its layout exceeds rustc's default query depth
     # limit of 128 ("queries overflow the depth limit"). Raise the limit for
     # this crate, as rustc's diagnostic suggests and as upstream already does
     # for app-server, exec and tui.
     postPatch = ''
+      substituteInPlace app-server-daemon/src/prepare_install.rs \
+        --subst-var-by storeDir ${builtins.storeDir} \
+        --subst-var out
       if ! grep -q 'recursion_limit' chatgpt/src/lib.rs; then
         substituteInPlace chatgpt/src/lib.rs \
           --replace-fail 'pub mod apply_command;' \
@@ -118,17 +125,17 @@ rustPlatform.buildRustPackage (
     inherit preBuild;
 
     # The daemon refuses to start unless it finds upstream's package layout
-    # around its executable (#9887). It rejects links that leave the package.
+    # around its executable (#9887).
     postFixup = ''
       mkdir -p $out/libexec/codex/{bin,codex-path,codex-resources}
       mv $out/bin/codex $out/bin/codex-code-mode-host $out/bin/logs_client \
         $out/libexec/codex/bin/
-      install -m755 ${lib.getExe ripgrep} $out/libexec/codex/codex-path/rg
+      ln -s ${lib.getExe ripgrep} $out/libexec/codex/codex-path/rg
       printf '%s\n' ${lib.escapeShellArg packageManifest} \
         > $out/libexec/codex/codex-package.json
 
       ${lib.optionalString stdenv.hostPlatform.isLinux ''
-        install -m755 ${lib.getExe bubblewrap} $out/libexec/codex/codex-resources/bwrap
+        ln -s ${lib.getExe bubblewrap} $out/libexec/codex/codex-resources/bwrap
       ''}
       ln -s ../libexec/codex/bin/codex $out/bin/codex
       ln -s ../libexec/codex/bin/codex-code-mode-host $out/bin/codex-code-mode-host
