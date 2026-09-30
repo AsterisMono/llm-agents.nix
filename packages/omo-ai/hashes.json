@@ -1,6 +1,5 @@
 {
-  "version": "5.1.0",
-  "hash": "sha256-o3ogtjiZVKohgBK3dVPTsxPKVi9HEE+Jdvjweckf7Rk=",
-  "senpiVersion": "2026.9.28-7",
-  "senpiHash": "sha256-TIEB/ya/DoPo4++htkzGDQB3yBjC439exXZjZaipKc8="
+  "version": "5.1.4",
+  "sourceHash": "sha256-DntOLmwCH5FoTfiKsddXPEYnv74KSdlvGl8NLedww/o=",
+  "npmDepsHash": "sha256-8GlU9IkZEeVlPM/K4dHvMnOMjCNCDWfjhDky0Co6zG8="
 }
