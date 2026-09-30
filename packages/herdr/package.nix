@@ -13,7 +13,7 @@
   versionCheckHomeHook,
 }:
 
-# build.rs shells out to `zig build` to compile vendored libghostty-vt.
+# crates/ghostty-vt/build.rs shells out to `zig build` to compile vendored libghostty-vt.
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "herdr";
   version = "0.9.3";
@@ -64,7 +64,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
   # but keep Zig's CPU baseline explicit to avoid build-host CPU features
   # leaking into the output.
   postPatch = ''
-    substituteInPlace build.rs \
+    substituteInPlace crates/ghostty-vt/build.rs \
       --replace-fail '.arg("build")' '.arg("build")
           .arg("-Dcpu=baseline")' \
       --replace-fail '.arg(format!("-Dtarget={zig_target}"))' ""
