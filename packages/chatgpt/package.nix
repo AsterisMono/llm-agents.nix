@@ -12,6 +12,7 @@
   nspr,
   nss,
   zlib,
+  gtk3,
   chatgpt-unwrapped ? callPackage ./unwrapped.nix { },
   commandLineArgs ? "",
 }:
@@ -53,6 +54,7 @@ stdenvNoCC.mkDerivation {
     mkdir -p "$out/bin"
     makeShellWrapper ${executable} "$out/bin/chatgpt" \
       ${lib.optionalString stdenv.hostPlatform.isLinux "--run '. ${patchRuntime}' --set-default DOTNET_SYSTEM_GLOBALIZATION_INVARIANT 1"} \
+      ${lib.optionalString stdenv.hostPlatform.isLinux "--prefix XDG_DATA_DIRS : ${gtk3}/share/gsettings-schemas/${gtk3.name}"} \
       --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform=wayland}}" \
       --add-flags ${lib.escapeShellArg commandLineArgs}
     ${lib.optionalString stdenv.hostPlatform.isLinux ''
