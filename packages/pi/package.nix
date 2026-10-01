@@ -81,7 +81,14 @@ buildNpmPackage {
     ln -s ../../dist/modes/interactive src/modes/interactive
     ln -s ../../dist/core/export-html src/core/export-html
 
-    bun build --compile ./dist/bun/cli.js ./src/utils/image-resize-worker.ts --outfile dist/pi
+    # Unlike upstream, autoload package.json: extension dependencies that use
+    # main/exports do not resolve otherwise (earendil-works/pi#9817).
+    bun build --compile \
+      --no-compile-autoload-bunfig \
+      --compile-autoload-package-json \
+      ./dist/bun/cli.js \
+      ./src/utils/image-resize-worker.ts \
+      --outfile dist/pi
   '';
 
   postInstall =
