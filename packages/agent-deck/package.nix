@@ -8,6 +8,7 @@
   versionCheckHomeHook,
   git,
   lsof,
+  procps,
   tmux,
 }:
 
@@ -45,6 +46,7 @@ buildGoModule rec {
           "TestWaitForFreshOutput_UniquePeerStillReads" # timing-sensitive
           "TestHealthRemoteExecJSONParity" # needs ssh client
           "TestRecallSearch_FederatedMergesAndLabels" # sqlite "database is locked" under parallel tests
+          "TestIssue2388_CapabilitiesCarryProbe" # resets PATH to /usr/bin:/bin, losing cat
         ]
         ++ lib.optionals stdenv.hostPlatform.isDarwin [
           # lsof on live processes is denied by the sandbox
@@ -67,6 +69,7 @@ buildGoModule rec {
 
   nativeCheckInputs = [
     lsof
+    procps
     tmux
   ];
 
