@@ -58,9 +58,14 @@
   libcap_ng,
   libseccomp,
 
+  OVMF,
+  virtiofsd,
+  runCommandLocal,
+
   buildFHSEnv,
   mesa,
   vulkan-loader,
+  systemdMinimal,
 
   # Needed for XDG_ICON_DIRS and GSETTINGS_SCHEMAS_PATH.
   adwaita-icon-theme,
@@ -94,8 +99,9 @@ let
     };
 
   # x-scheme-handler/claude registers the OAuth sign-in handler.
+  # xdg-desktop-portal rejects the app unless the file is named after its app ID.
   desktopItem = makeDesktopItem {
-    name = "claude-desktop";
+    name = "com.anthropic.Claude";
     desktopName = "Claude";
     genericName = "AI Assistant";
     comment = "Desktop application for Claude.ai";
@@ -114,7 +120,7 @@ let
       "Development"
     ];
     startupNotify = true;
-    startupWMClass = "claude-desktop";
+    startupWMClass = "com.anthropic.Claude";
     singleMainWindow = true;
     mimeTypes = [ "x-scheme-handler/claude" ];
     actions = {
@@ -128,6 +134,17 @@ let
       };
     };
   };
+
+  # Cowork's VM probes Debian's fixed firmware paths. qemu itself comes from
+  # the host PATH; bundling it grows the closure by ~0.8 GiB.
+  coworkFirmware =
+    let
+      dir = if stdenvNoCC.hostPlatform.isAarch64 then "AAVMF" else "OVMF";
+    in
+    runCommandLocal "claude-desktop-cowork-firmware" { } ''
+      mkdir -p $out/share/${dir}
+      ln -s ${OVMF.firmware} ${OVMF.variables} $out/share/${dir}/
+    '';
 
   passthru = {
     category = "AI Coding Agents";
@@ -312,6 +329,9 @@ else
       mesa
       libgbm
       vulkan-loader
+      systemdMinimal # /usr/bin/busctl, used to probe for desktop portals
+      virtiofsd
+      coworkFirmware
     ];
 
     runScript = "claude-desktop";
