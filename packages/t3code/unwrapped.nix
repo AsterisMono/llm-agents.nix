@@ -108,6 +108,14 @@ stdenv.mkDerivation {
   strictDeps = true;
   __structuredAttrs = true;
 
+  # Public production identifiers, also embedded in upstream release builds.
+  # loadRepoEnv supplies the corresponding VITE_* values for the web frontend.
+  env = {
+    T3CODE_RELAY_URL = "https://relay.t3.codes";
+    T3CODE_CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsudDMuY29kZXMk";
+    T3CODE_CLERK_CLI_OAUTH_CLIENT_ID = "hzxSgY2cH10sDU2r";
+  };
+
   pnpmDeps = fetchPnpmDeps {
     inherit
       pnpm
