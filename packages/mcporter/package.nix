@@ -67,6 +67,9 @@ stdenv.mkDerivation (finalAttrs: {
 
     # Prune dev dependencies to reduce closure size
     pnpm prune --prod
+    # With upstream's hoisted node linker prune keeps the .bin links of the
+    # removed dev tools.
+    find node_modules -xtype l -delete
 
     cp -r dist $out/lib/mcporter/
     cp -r node_modules $out/lib/mcporter/
