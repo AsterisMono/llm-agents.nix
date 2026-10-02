@@ -65,6 +65,7 @@
   buildFHSEnv,
   mesa,
   vulkan-loader,
+  systemdMinimal,
 
   # Needed for XDG_ICON_DIRS and GSETTINGS_SCHEMAS_PATH.
   adwaita-icon-theme,
@@ -98,8 +99,9 @@ let
     };
 
   # x-scheme-handler/claude registers the OAuth sign-in handler.
+  # xdg-desktop-portal rejects the app unless the file is named after its app ID.
   desktopItem = makeDesktopItem {
-    name = "claude-desktop";
+    name = "com.anthropic.Claude";
     desktopName = "Claude";
     genericName = "AI Assistant";
     comment = "Desktop application for Claude.ai";
@@ -118,7 +120,7 @@ let
       "Development"
     ];
     startupNotify = true;
-    startupWMClass = "claude-desktop";
+    startupWMClass = "com.anthropic.Claude";
     singleMainWindow = true;
     mimeTypes = [ "x-scheme-handler/claude" ];
     actions = {
@@ -327,6 +329,7 @@ else
       mesa
       libgbm
       vulkan-loader
+      systemdMinimal # /usr/bin/busctl, used to probe for desktop portals
       virtiofsd
       coworkFirmware
     ];

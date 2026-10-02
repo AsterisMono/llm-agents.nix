@@ -10,6 +10,7 @@
   nodejs_24,
   node-gyp,
   pkg-config,
+  formatelf,
   libsecret,
   python3,
   cacert,
@@ -28,14 +29,14 @@
 
 let
   pname = "t3code";
-  version = "0.0.42";
+  version = "0.0.44";
   pnpm = pnpm_11;
 
   src = fetchFromGitHub {
     owner = "pingdotgg";
     repo = "t3code";
     tag = "v${version}";
-    hash = "sha256-YV86WqqpGQwjeovXB0IoE3f/o4IUC5DDVdBEdT4xzjc=";
+    hash = "sha256-cSkGa6b+WGbXJ+lbpJ3tfCibtvaj7DwWhn66UGiXlWk=";
   };
 
   # The web build's third-party-licenses vite plugin downloads SPDX license
@@ -116,7 +117,7 @@ stdenv.mkDerivation {
       pnpmWorkspaces
       ;
     fetcherVersion = 4;
-    hash = "sha256-gEY2em9pNTC1EuVX0V3L/Wu1apZ+BKBXxALEcPQ/pwA=";
+    hash = "sha256-xdS9+PqIDULKIu3+lQRMabA23D0dxCEME96NhFggWPY=";
   };
 
   nativeBuildInputs = [
@@ -130,7 +131,10 @@ stdenv.mkDerivation {
     pnpmConfigHook
     python3
   ]
-  ++ lib.optionals stdenv.hostPlatform.isLinux [ pkg-config ]
+  ++ lib.optionals stdenv.hostPlatform.isLinux [
+    formatelf
+    pkg-config
+  ]
   ++ lib.optionals stdenv.hostPlatform.isDarwin [
     cctools.libtool
     libicns
@@ -139,7 +143,10 @@ stdenv.mkDerivation {
   ];
 
   # build:desktop compiles native/browser-secret against libsecret on linux
-  buildInputs = lib.optionals stdenv.hostPlatform.isLinux [ libsecret ];
+  buildInputs = lib.optionals stdenv.hostPlatform.isLinux [
+    libsecret
+    stdenv.cc.cc.lib
+  ];
 
   # We run electron on an unpacked tree, so app.isPackaged is false and the
   # backend would treat the store path as the workspace root (#9182).
@@ -182,6 +189,7 @@ stdenv.mkDerivation {
   # Dependencies include prebuilt artifacts for foreign systems and statically
   # linked executables, which must not be patched or audited as host binaries.
   dontPatchELF = true;
+  dontAutoPatchelf = true;
   noAuditTmpdir = true;
 
   installPhase = ''
@@ -228,7 +236,7 @@ stdenv.mkDerivation {
     cp -r ${desktopItem}/share/applications "$desktop/share/"
 
     ${lib.optionalString stdenv.hostPlatform.isDarwin ''
-      find "$desktop/libexec/t3code" \
+      find "$out/libexec/t3code" "$desktop/libexec/t3code" \
         -path '*/node-pty/prebuilds/darwin-*/spawn-helper' \
         -exec chmod 755 {} +
 
@@ -241,6 +249,12 @@ stdenv.mkDerivation {
     ''}
 
     runHook postInstall
+  '';
+
+  # Electron, unlike node, does not already have libstdc++ loaded for the
+  # prebuilt pty.node (#10125).
+  postFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
+    autoPatchelf "$out/libexec/t3code/apps/server/node_modules/node-pty/prebuilds/${platformKey}"
   '';
 
   postInstall = ''

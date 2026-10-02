@@ -7,14 +7,14 @@
 
 python3.pkgs.buildPythonApplication rec {
   pname = "mcptoon";
-  version = "0.7.22";
+  version = "0.8.7";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "activeing123";
     repo = "mcptoon";
     tag = "v${version}";
-    hash = "sha256-MGOoX82pMbd4K2VzMQu1cqjU0+FLXPFoEDgcyBrl08Q=";
+    hash = "sha256-XE2OK1LQ5LRocQORk1GQSiKyIXebsfstb86CPjDwNT8=";
   };
 
   # Upstream tags releases without bumping __version__ (v0.2.2 still
@@ -47,6 +47,8 @@ python3.pkgs.buildPythonApplication rec {
     "test_search_registry_returns_list"
     "test_search_smithery_returns_list"
     "test_search_mcp_registry_returns_list"
+    # Expects an editable install, we test the copy in $out.
+    "test_packaged_path_resolves_to_the_copy_on_disk"
   ];
 
   passthru.category = "Utilities";

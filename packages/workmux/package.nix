@@ -3,6 +3,7 @@
   stdenv,
   rustPlatform,
   fetchFromGitHub,
+  installAgentSkills,
   installShellFiles,
   versionCheckHook,
   versionCheckHomeHook,
@@ -10,38 +11,32 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "workmux";
-  version = "0.1.266";
+  version = "0.1.269";
 
   src = fetchFromGitHub {
     owner = "raine";
     repo = "workmux";
     tag = "v${version}";
-    hash = "sha256-esfHnMipv0yJ0/5hH8855CaZj5L1qZ3i5bZHZQ7fMWg=";
+    hash = "sha256-Lmy69m6PTftoZVasYDei5zeUnv2ND3E+kvFDAuuQfNM=";
   };
 
-  cargoHash = "sha256-CpHBI5ZkcnxIHG2xQztEb+xRCrERcnO4s+ni8hPVZfM=";
+  cargoHash = "sha256-9PcUNrRpG3jwOAFd5PO9wl2ydiJEccKNKnL2ThVS6nk=";
 
   nativeBuildInputs = [
+    installAgentSkills
     installShellFiles
   ];
 
   # Some tests require filesystem access outside the sandbox
   doCheck = false;
 
-  postInstall =
-    lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
-      export HOME=$(mktemp -d)
-      installShellCompletion --cmd workmux \
-        --bash <($out/bin/workmux completions bash) \
-        --fish <($out/bin/workmux completions fish) \
-        --zsh <($out/bin/workmux completions zsh)
-    ''
-    + ''
-      # Install Claude Code skills shipped with workmux so users can
-      # symlink $out/share/workmux/skills/* into ~/.claude/skills/
-      install -d $out/share/workmux
-      cp -r skills $out/share/workmux/skills
-    '';
+  postInstall = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
+    export HOME=$(mktemp -d)
+    installShellCompletion --cmd workmux \
+      --bash <($out/bin/workmux completions bash) \
+      --fish <($out/bin/workmux completions fish) \
+      --zsh <($out/bin/workmux completions zsh)
+  '';
 
   doInstallCheck = true;
   nativeInstallCheckInputs = [
