@@ -17,6 +17,13 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   cargoHash = "sha256-EK3iCT+VJQ/1Sjhdt06nc1pUdo0B6tPBjbjSV9jsRKY=";
 
+  # The darwin cc-wrapper re-quotes non-ASCII arguments as $'\303\274', which
+  # breaks linking the fake herdr in a temp dir named with "ü".
+  postPatch = ''
+    substituteInPlace crates/plannotator-tui/tests/terminal.rs \
+      --replace-fail ' ü-' ' u-'
+  '';
+
   preCheck = ''
     export HOME=$(mktemp -d)
   '';
