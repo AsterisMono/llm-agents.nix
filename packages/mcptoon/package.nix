@@ -47,6 +47,8 @@ python3.pkgs.buildPythonApplication rec {
     "test_search_registry_returns_list"
     "test_search_smithery_returns_list"
     "test_search_mcp_registry_returns_list"
+    # Expects an editable install, we test the copy in $out.
+    "test_packaged_path_resolves_to_the_copy_on_disk"
   ];
 
   passthru.category = "Utilities";
