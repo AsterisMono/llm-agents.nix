@@ -29,6 +29,13 @@ rustPlatform.buildRustPackage (finalAttrs: {
     pkg-config
   ];
 
+  # Upstream's fat LTO with codegen-units=1 is a single-threaded link that
+  # exceeds the aarch64 builder's 1200s timeout.
+  env = {
+    CARGO_PROFILE_RELEASE_LTO = "off";
+    CARGO_PROFILE_RELEASE_CODEGEN_UNITS = "16";
+  };
+
   doCheck = false;
 
   doInstallCheck = true;
