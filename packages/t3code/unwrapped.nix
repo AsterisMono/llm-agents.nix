@@ -223,6 +223,11 @@ stdenv.mkDerivation {
       "$out/libexec/t3code/apps/server/dist/resource-monitor/${platformKey}/t3-resource-monitor" \
       "$desktop/libexec/t3code/apps/desktop/prod-resources/resource-monitor/t3-resource-monitor"
 
+    ${lib.optionalString stdenv.hostPlatform.isLinux ''
+      install -Dm755 native/browser-secret/build/${stdenv.hostPlatform.node.arch}/t3-browser-secret \
+        "$desktop/libexec/t3code/apps/desktop/prod-resources/browser-secret/t3-browser-secret"
+    ''}
+
     find "$out/libexec/t3code" "$desktop/libexec/t3code" -xtype l -delete
 
     mkdir -p "$desktop/bin"
