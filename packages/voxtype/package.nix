@@ -36,7 +36,17 @@ rustPlatform.buildRustPackage rec {
     hash = "sha256-zw7Up84IdNv6p8Ae7VnBDuCC/smYHCpMB7C2aN1ZXyc=";
   };
 
-  cargoHash = "sha256-tufqwMhpnHB3uSIueQYnsDCZrN7nuHMO45BLE06mOC8=";
+  cargoDeps = rustPlatform.fetchCargoVendor {
+    inherit pname version src;
+    # The (optional, unused here) openvino-sys git dependency drags in the
+    # OpenVINO submodules. ittapi has a `c-library -> ../../` symlink in there
+    # that sends the vendoring copy into an endless recursion. The crate only
+    # packages the C headers, so thirdparty is safe to drop.
+    postBuild = ''
+      rm -r $out/git/*/crates/openvino-sys/upstream/thirdparty
+    '';
+    hash = "sha256-EppXpVL6J+4DnF7rDIQuTjB1h9J5+O+zUffzI+WlMQ8=";
+  };
 
   nativeBuildInputs = [
     cmake
